@@ -1,7 +1,17 @@
-library user;
+library myuser;
 
-class MyUser {
-    String name;
-    String interests;
-    MyUser(String name, String interests);
+import 'package:exportable/exportable.dart';
+
+class MyUser extends Object with Exportable {
+    @export String name;
+    @export String interests;
+    @export String latitude;
+    @export String longitude;
+
+    MyUser({this.name, this.interests, this.latitude, this.longitude});
+
+    setCoordinates(String latitude, String longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }
