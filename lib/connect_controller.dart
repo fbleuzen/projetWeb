@@ -20,18 +20,21 @@ class ConnectController {
     String websocketmessage;
     WebSocket ws;
     final Http _http;
+    final Router router;
     String serverURL = "http://127.0.0.1:8080/WebSocketsServer";
 
-    ConnectController(this._http);
+    ConnectController(this.router, this._http);
 
     createUser() {
         user = new MyUser(name : name, interests : interests, latitude : "0.00", longitude : "0.00");
 
         var url = serverURL + "/connect";
+        print("JSON : " + user.toJson());
         _http.post(url, user.toJson()).then((HttpResponse response) {
            print("Connect OK");
            initWebSocket();
            connected = true;
+           router.go('map', {});
         }).catchError((e) {
             print("Erreur ${e}");
         });
@@ -81,6 +84,7 @@ class ConnectController {
       });
 
       ws.onMessage.listen((MessageEvent e) {
+          print('Received message: ${e.data}');
         MyUser userReceived = new MyUser()
             ..initFromJson(e.data);
         if (otherUsers.containsKey(userReceived.name)) {
@@ -91,8 +95,11 @@ class ConnectController {
             print("ADD");
         }
         websocketmessage = e.data;
-        print('Received message: ${e.data}');
       });
+    }
+
+    sendTest() {
+        ws.sendString(user.toJson());
     }
 
 }
