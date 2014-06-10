@@ -3,14 +3,13 @@ var MapController = function() {
     var map;
     var pointMe;
     var maMap = {};
-    var offset = 1;
 
 
     this.getLocation = function() {
         var demo=document.getElementById("coord");
         var position;
-        function showPosition(position) {
-            demo.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude + "<br>Accuracy: " + position.coords.accuracy;
+        function showPosition(pos) {
+            demo.innerHTML = "Latitude: " + pos.coords.latitude + "<br>Longitude: " + pos.coords.longitude + "<br>Accuracy: " + pos.coords.accuracy;
         }
 
         if (navigator.geolocation) {
@@ -30,7 +29,7 @@ var MapController = function() {
     this.addMarker = function(name, interest, lat, long) {
 
         var marker = new google.maps.Marker({
-            position: new google.maps.LatLng(lat+offset, long+offset),
+            position: new google.maps.LatLng(lat, long),
             map: map,
             title: name
         });
@@ -40,13 +39,12 @@ var MapController = function() {
         var contentMarker = "Hello my name is "+name+" and I'm interested in : "+interest;
         var infoWindow = new google.maps.InfoWindow({
             content  : contentMarker,
-            position : new google.maps.LatLng(lat+offset, long+offset)
+            position : new google.maps.LatLng(lat, long)
         });
 
         google.maps.event.addListener(marker, 'click', function() {
-            infoWindow.open(map,contentMarker);
+            infoWindow.open(map, marker);
         });
-        offset = offset +1;
     }
 
     this.updateMarker = function(name, interest, lat, long) {
@@ -54,6 +52,27 @@ var MapController = function() {
         marker.setPosition(new google.maps.LatLng(lat, long));
     }
 
+    this.addMyMarker = function(name, interest, lat, long) {
+        pointMe = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, long),
+            map: map,
+            title: name
+        });
+
+        maMap[name] = pointMe;
+
+        var contentMarker = "Hello my name is "+name+" and I'm interested in "+interest;
+        var infoWindow = new google.maps.InfoWindow({
+            content  : contentMarker,
+            position : new google.maps.LatLng(lat, long)
+        });
+
+        google.maps.event.addListener(pointMe, 'click', function() {
+            infoWindow.open(map, pointMe);
+        });
+
+        navigator.geolocation.watchPosition(this.updatePosition);
+    }
     this.addListenerToMarker = function(func) {
         google.maps.event.addListener(pointMe, 'position_changed', func);
     }
@@ -73,16 +92,6 @@ var MapController = function() {
         };
 
         map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-        pointMe = new google.maps.Marker({
-            position: new google.maps.LatLng(0.00, 0.00),
-            map: map,
-            title: "Me"
-        });
-
-        maMap[name] = pointMe;
-
-        navigator.geolocation.watchPosition(this.updatePosition);
     };
 };
 

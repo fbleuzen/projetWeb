@@ -18,7 +18,6 @@ class ConnectController {
     MyUser user;
     Map<String, MyUser> users = new Map<String, MyUser>();
 
-    String websocketmessage;
     WebSocket ws;
     final Http _http;
     final Router router;
@@ -38,6 +37,7 @@ class ConnectController {
            print("Connect OK");
 //           initWebSocket();
            connected = true;
+           users[user.name] = user;
            router.go('map', {});
         }).catchError((e) {
             print("Erreur ${e}");
@@ -93,16 +93,17 @@ class ConnectController {
             ..initFromJson(e.data);
         if (users.containsKey(userReceived.name)) {
             users[userReceived.name].setCoordinates(userReceived.latitude, userReceived.longitude);
+            print("update");
             mapController.callMethod('updateMarker', [userReceived.name, userReceived.interests, double.parse(userReceived.latitude), double.parse(userReceived.longitude)]);
         } else {
             users[userReceived.name] = userReceived;
+            print("add");
             mapController.callMethod('addMarker', [userReceived.name, userReceived.interests, double.parse(userReceived.latitude), double.parse(userReceived.longitude)]);
         }
-        websocketmessage = e.data;
       });
     }
 
-    sendTest() {
+    sendUser() {
         ws.sendString(user.toJson());
     }
 
@@ -111,16 +112,15 @@ class ConnectController {
         var position = mapController.callMethod('getMyPosition');
         print(position);
         user.setCoordinates('${position[0]}', '${position[1]}');
-        sendTest();
+        sendUser();
     }
 
     loadMap() {
         print("LOADING MAP");
         mapController = new JsObject(context['MapController']);
         mapController.callMethod('initialize');
-        //eventHandler = context['google']['maps']['event'];
+        mapController.callMethod('addMyMarker', [user.name, user.interests, double.parse(user.latitude), double.parse(user.longitude)]);
         mapController.callMethod('addListenerToMarker', [positionChanged]);
-        //context.callMethod('google.maps.event.addListener', [mapController.pointMe, 'position_changed', () {}]);
         initWebSocket();
         print("LOADED");
     }
