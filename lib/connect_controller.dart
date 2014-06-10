@@ -2,6 +2,7 @@ library webProject.connect_controller;
 
 import 'dart:html';
 import 'dart:async';
+import 'dart:js';
 
 import 'package:angular/angular.dart';
 import 'package:angular/core/module.dart';
@@ -15,13 +16,16 @@ class ConnectController {
     String interests;
     bool connected = false;
     MyUser user;
-    Map<String, MyUser> otherUsers = new Map<String, MyUser>();
+    Map<String, MyUser> users = new Map<String, MyUser>();
 
     String websocketmessage;
     WebSocket ws;
     final Http _http;
     final Router router;
     String serverURL = "http://127.0.0.1:8080/WebSocketsServer";
+
+    var mapController;
+    var eventHandler;
 
     ConnectController(this.router, this._http);
 
@@ -32,7 +36,7 @@ class ConnectController {
         print("JSON : " + user.toJson());
         _http.post(url, user.toJson()).then((HttpResponse response) {
            print("Connect OK");
-           initWebSocket();
+//           initWebSocket();
            connected = true;
            router.go('map', {});
         }).catchError((e) {
@@ -87,12 +91,12 @@ class ConnectController {
           print('Received message: ${e.data}');
         MyUser userReceived = new MyUser()
             ..initFromJson(e.data);
-        if (otherUsers.containsKey(userReceived.name)) {
-            otherUsers[userReceived.name].setCoordinates(userReceived.latitude, userReceived.longitude);
-            print("MAJ");
+        if (users.containsKey(userReceived.name)) {
+            users[userReceived.name].setCoordinates(userReceived.latitude, userReceived.longitude);
+            mapController.callMethod('updateMarker', [userReceived.name, userReceived.interests, double.parse(userReceived.latitude), double.parse(userReceived.longitude)]);
         } else {
-            otherUsers[userReceived.name] = userReceived;
-            print("ADD");
+            users[userReceived.name] = userReceived;
+            mapController.callMethod('addMarker', [userReceived.name, userReceived.interests, double.parse(userReceived.latitude), double.parse(userReceived.longitude)]);
         }
         websocketmessage = e.data;
       });
@@ -100,6 +104,25 @@ class ConnectController {
 
     sendTest() {
         ws.sendString(user.toJson());
+    }
+
+    positionChanged() {
+        print("position changed");
+        var position = mapController.callMethod('getMyPosition');
+        print(position);
+        user.setCoordinates('${position[0]}', '${position[1]}');
+        sendTest();
+    }
+
+    loadMap() {
+        print("LOADING MAP");
+        mapController = new JsObject(context['MapController']);
+        mapController.callMethod('initialize');
+        //eventHandler = context['google']['maps']['event'];
+        mapController.callMethod('addListenerToMarker', [positionChanged]);
+        //context.callMethod('google.maps.event.addListener', [mapController.pointMe, 'position_changed', () {}]);
+        initWebSocket();
+        print("LOADED");
     }
 
 }

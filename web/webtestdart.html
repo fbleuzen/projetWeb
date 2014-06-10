@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="webtestdart.css">
 
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?sensor=true">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9s_zI-c568u4D11pePUuW0nV_6MtlmL0&sensor=true">
     </script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
 
@@ -58,6 +58,7 @@
 
     <!-- Begin page content -->
     <div class="container">
+        <div id="coord"></div>
         <div id="details">
             <ng-view></ng-view>
         </div>
@@ -77,6 +78,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="../dist/js/bootstrap.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/map.js"></script>
     <script type="application/dart" src="webtestdart.dart"></script>
     <script src="packages/browser/dart.js"></script>
 </body>

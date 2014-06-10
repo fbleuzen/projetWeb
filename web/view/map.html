@@ -1,6 +1,6 @@
 <div id='connectResult'>
     Hello {{ctrl.user.name}} ! <br/>
-    Your interests are {{ctrl.user.interests}}.
-    <div id="map-canvas"></div>
-    <script src="js/map.js"></script>
+    Your interests are {{ctrl.user.interests}} <br/>
+    <button type="button" class="btn-primary" ng-click="ctrl.loadMap()">Load map</button>
+    <div id="map" style="width: 1024px; height: 768px;"></div>
 </div>
